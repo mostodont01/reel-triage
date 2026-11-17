@@ -64,3 +64,15 @@ def test_fetch_failure_is_recorded(store, monkeypatch):
     monkeypatch.setattr(fetch, "download", boom)
     meta = fetch.fetch(store, "AAAAAA", log=lambda *_: None)
     assert meta["status"] == "failed" and "not available" in meta["error"]
+
+
+def test_photo_post_is_reviewable(store, monkeypatch):
+    store.add("AAAAAA", caption="a photo with a tip")
+
+    def no_video(*a, **k):
+        raise fetch.FetchError("[Instagram] AAAAAA: No video formats found!")
+
+    monkeypatch.setattr(fetch, "download", no_video)
+    meta = fetch.fetch(store, "AAAAAA", log=lambda *_: None)
+    assert meta["status"] == "fetched" and meta["kind"] == "text" and meta["frames"] == []
+    assert [m["id"] for m in store.to_review()] == ["AAAAAA"]

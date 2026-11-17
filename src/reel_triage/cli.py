@@ -127,7 +127,8 @@ def cmd_review(store: Store, a) -> None:
             failed += 1
             print(f"  failed: {e}")
             continue
-        print(f"  {v['verdict'].upper():5} {'★' * v['quality']:5} [{v['category']}] {v['title']}")
+        use = ", ".join(f"{k} {x:.0%}" for k, x in usage.items())
+        print(f"  {v['verdict'].upper():5} {'★' * v['quality']:5} [{v['category']}] {v['title']}  [{use}]")
         if _stop(usage, a):
             break
     if failed:

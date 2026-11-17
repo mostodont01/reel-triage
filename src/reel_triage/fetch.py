@@ -171,6 +171,13 @@ def fetch(store: Store, code: str, model: str = "small", cookies_from: str | Non
     try:
         info = download(code, folder, cookies_from)
     except FetchError as e:
+        if "no video formats" in str(e).lower():
+            # A photo post: nothing to download, but the export's caption can
+            # still be reviewed.
+            (folder / "transcript.txt").write_text("\n", encoding="utf-8")
+            log("  no video (photo post): reviewing from the caption")
+            return store.update(code, status="fetched", error=None, kind="text", video=None,
+                                poster=None, frames=[], language=None)
         log(f"  download failed: {e}")
         return store.update(code, status="failed", error=str(e)[:500])
 
