@@ -39,7 +39,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16p
   border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
 .card.dim { opacity: .55; }
 .card.text { grid-template-columns: 1fr; padding: 12px 16px; }
+.card.text .body { gap: 4px; }
 .card.text h2 { font-size: 16px; }
+.card.text .comment { font-size: 14.5px; }
+.card.text .picks { padding-top: 6px; }
+.card.text .picks .btn { padding: 3px 10px; font-size: 12px; }
+.body p { margin: 0; }
 .badge.quick { opacity: .75; }
 .b-check { background: var(--accent); }
 .cat.coll { background: transparent; border: 1px dashed var(--line); }
@@ -152,9 +157,9 @@ function matches(r) {
 function sorted(list) {
   const t = r => r.saved_at || r.added || 0;
   return list.slice().sort(state.sort === "new" ? (a, b) => t(b) - t(a) : (a, b) => {
-    const oa = ORDER[vkey(a)] ?? 9, ob = ORDER[vkey(b)] ?? 9;
-    return oa - ob || (b.verdict ? 1 : 0) - (a.verdict ? 1 : 0)
-      || (b.verdict?.quality || 0) - (a.verdict?.quality || 0) || t(b) - t(a);
+    // Fully reviewed reels first (skips last), then the caption-only sort.
+    const rank = r => (r.verdict ? 0 : 10) + (ORDER[vkey(r)] ?? 9) + (vkey(r) === "skip" ? 20 : 0);
+    return rank(a) - rank(b) || (b.verdict?.quality || 0) - (a.verdict?.quality || 0) || t(b) - t(a);
   });
 }
 
@@ -165,7 +170,7 @@ function card(r) {
   const vid = r.video
     ? `<video controls preload="none" playsinline ${poster ? `poster="${poster}"` : ""} src="${media(r, r.video)}"></video>`
     : (poster ? `<img src="${poster}" alt="">` : "");
-  const frames = (r.frames || []).map(f => `<img src="${media(r, f)}" alt="" loading="lazy" data-zoom>`).join("");
+  const frames = (r.frames || []).map(f => `<img src="${media(r, f)}" alt="" data-zoom>`).join("");
   const q = !v && r.quick;
   let body = `<div class="head"><span class="badge b-${k}${q ? " quick" : ""}">${LABEL[k]}</span>`;
   if (cat(r)) body += `<span class="cat">${esc(cat(r))}</span>`;
@@ -267,7 +272,10 @@ for (const id of ["category", "pick", "sort"]) {
 }
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; save(); shown = PAGE; render(); });
 
-fetch("/api/reels").then(r => r.json()).then(data => { reels = data; buildFilters(); render(); })
+function start(data) { reels = data; buildFilters(); render(); }
+const INITIAL = /*__REELS__*/null;
+if (INITIAL) start(INITIAL);
+else fetch("/api/reels").then(r => r.json()).then(start)
   .catch(() => { document.getElementById("feed").innerHTML = `<p class="empty">Can't reach the reel-triage server.</p>`; });
 </script>
 </body>

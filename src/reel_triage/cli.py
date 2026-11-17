@@ -306,6 +306,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> None:
+    sys.stdout.reconfigure(line_buffering=True)  # progress shows up in log files
     a = parser().parse_args(argv)
     store = Store(Path(a.home) if a.home else None)
     a.func(store, a)

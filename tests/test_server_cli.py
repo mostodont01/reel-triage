@@ -110,3 +110,11 @@ def test_cli_verdict_and_pick(store, tmp_path, capsys):
 def test_cli_rejects_bad_ids(store):
     with pytest.raises(SystemExit):
         cli.main(["add", "not a link"])
+
+
+def test_page_embeds_data_safely(store):
+    store.add("AAAAAA", caption="evil </script><script>alert(1)</script>")
+    html = server.page(store).decode()
+    assert "/*__REELS__*/" not in html
+    assert "</script><script>alert" not in html  # can't close the script tag
+    assert '"AAAAAA"' in html

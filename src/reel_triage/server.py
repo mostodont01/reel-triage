@@ -33,8 +33,13 @@ def reels_json(store: Store) -> list[dict]:
     return out
 
 
-def page() -> bytes:
-    return resources.files(__package__).joinpath("feed.html").read_bytes()
+def page(store: Store | None = None) -> bytes:
+    """The feed page, with the data embedded so it renders at once."""
+    html = resources.files(__package__).joinpath("feed.html").read_text(encoding="utf-8")
+    if store is not None:
+        data = json.dumps(reels_json(store), ensure_ascii=False).replace("</", "<\\/")
+        html = html.replace("/*__REELS__*/null", data, 1)
+    return html.encode("utf-8")
 
 
 def make_handler(store: Store):
@@ -64,7 +69,7 @@ def make_handler(store: Store):
         def do_GET(self):
             path = self.path.split("?", 1)[0]
             if path in ("/", "/index.html"):
-                return self._send(HTTPStatus.OK, page(), "text/html; charset=utf-8")
+                return self._send(HTTPStatus.OK, page(store), "text/html; charset=utf-8")
             if path == "/api/reels":
                 return self._json(reels_json(store))
             match = _MEDIA.match(path)
