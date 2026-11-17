@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+dist/
+# Real data (saved reels, videos, verdicts) lives in ~/.local/share/reel-triage, never here.
+*.zip
+data/
