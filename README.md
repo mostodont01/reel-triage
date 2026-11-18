@@ -13,8 +13,9 @@ built in.
    text often names the tool), transcribe the audio locally with Whisper, and
    let Claude verify the tool on the web (repo, stars, last update, install
    risks, already built in or already in your setup).
-4. **Browse the feed**: the reel plays next to Claude's comment, with filters,
-   and you mark reels *Implement* / *Tried* / *Dismiss*.
+4. **Browse** in the desktop app (or the web feed): the reel plays next to
+   Claude's comment, with filters, and you mark reels *Implement* / *Tried* /
+   *Dismiss*.
 5. **Implement** the picked ones in a Claude Code session (`/reels` skill).
 
 Claude runs through the Claude Code CLI (`claude -p`) on your existing login,
@@ -27,12 +28,24 @@ so no API key is needed. Batch commands stop on their own before your plan's
 git clone https://github.com/mostodont01/reel-triage
 cd reel-triage
 uv tool install -e .          # puts `reel-triage` on your PATH
+reel-triage install-desktop   # the app in your app menu (Reel Triage)
 reel-triage install-skill     # optional: the /reels skill for Claude Code
 ```
 
 Needs Python 3.12+, [uv](https://docs.astral.sh/uv/) and
 [Claude Code](https://claude.com/claude-code) (logged in). ffmpeg comes as a
 pip wheel, so no system packages or root are needed.
+
+## The app
+
+`reel-triage app` (or *Reel Triage* in the app menu) is a PySide6 + QML
+desktop app: filters by verdict, your picks and category on the left, the
+reels in the middle, the selected reel on the right (video, the frames
+Claude saw, its verdict, the tool it checked, the install command with a Copy
+button). **Get new reels…** takes pasted links or an export zip; **Sort &
+review** runs `sort` and `run` with a live log and stops on its own at 80 %
+of the 5-hour window; the Claude usage bars sit at the bottom left.
+Keys: ↑ ↓ move, I implement, T tried, D dismiss, Ctrl+F search.
 
 ## Use
 
@@ -44,7 +57,8 @@ reel-triage add https://www.instagram.com/reel/…   # or single links
 
 reel-triage sort          # quick sort from captions
 reel-triage run -n 20     # deep review of the 20 newest "deep look" reels
-reel-triage serve         # the feed at http://127.0.0.1:8790
+reel-triage app           # the desktop app
+reel-triage serve         # or the web feed at http://127.0.0.1:8790
 reel-triage status
 ```
 

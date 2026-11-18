@@ -11,6 +11,7 @@
     reel-triage show <id>               everything known about a reel (for a Claude session)
     reel-triage verdict <id> <file|->   store a verdict written by hand
     reel-triage pick <id> <want|tried|dismissed|none>
+    reel-triage app                     the desktop app (install-desktop adds it to the menu)
     reel-triage serve                   the feed page
     reel-triage install-skill           link the /reels skill into ~/.claude/skills
 """
@@ -214,6 +215,22 @@ def cmd_serve(store: Store, a) -> None:
     server.serve(store, a.host, a.port or server.DEFAULT_PORT, open_browser=not a.no_open)
 
 
+def cmd_app(store: Store, a) -> None:
+    from .app import main as app_main
+
+    sys.exit(app_main([sys.argv[0]], store))
+
+
+def cmd_install_desktop(store: Store, a) -> None:
+    from .app import desktop
+
+    if a.uninstall:
+        desktop.uninstall()
+        print("removed Reel Triage from the app menu")
+    else:
+        print(f"added Reel Triage to the app menu: {desktop.install()}")
+
+
 def cmd_install_skill(store: Store, a) -> None:
     src = Path(__file__).resolve().parents[2] / "skill" / "reels"
     dest = Path.home() / ".claude" / "skills" / "reels"
@@ -301,6 +318,11 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument("--port", type=int, default=None, help="default 8790; the next free port if busy")
     s.add_argument("--no-open", action="store_true")
     s.set_defaults(func=cmd_serve)
+
+    sub.add_parser("app", help="open the desktop app").set_defaults(func=cmd_app)
+    s = sub.add_parser("install-desktop", help="add the app to the app menu")
+    s.add_argument("--uninstall", action="store_true")
+    s.set_defaults(func=cmd_install_desktop)
 
     sub.add_parser("install-skill", help="link the /reels skill into ~/.claude/skills").set_defaults(func=cmd_install_skill)
     return p

@@ -40,10 +40,12 @@ Never scrape Instagram with automated logins.
   quality 1-5, optional action, tool{name,url,stars,last_update,already_have,
   built_in,safety}, projects, links).
 
-## 4. The feed
-`reel-triage serve` (run it in the background; it opens
-http://127.0.0.1:8790). The user filters by verdict, category and status and
-marks reels Implement / Tried / Dismiss.
+## 4. The app
+The user browses in the **Reel Triage** desktop app (app menu, or
+`reel-triage app` in the background). They filter by verdict, category and
+picks and mark reels Implement / Tried / Dismiss; the app can also add links,
+import an export zip and run sort + review itself. The web feed
+(`reel-triage serve`, http://127.0.0.1:8790) shows the same data.
 
 ## 5. Implement what they picked
 `reel-triage list --pick want --json`, then for each:
