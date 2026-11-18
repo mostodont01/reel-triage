@@ -118,3 +118,16 @@ def test_page_embeds_data_safely(store):
     assert "/*__REELS__*/" not in html
     assert "</script><script>alert" not in html  # can't close the script tag
     assert '"AAAAAA"' in html
+
+
+def test_busy_port_falls_back_to_the_next(store):
+    first = server.make_server(store, port=0)
+    try:
+        busy = first.server_port
+        second = server.make_server(store, port=busy, tries=20)
+        assert second.server_port != busy
+        second.server_close()
+        with pytest.raises(OSError):
+            server.make_server(store, port=busy)  # tries=1: no fallback
+    finally:
+        first.server_close()

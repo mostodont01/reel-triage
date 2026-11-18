@@ -6,6 +6,7 @@
     GET  /media/<id>/<file>     video, poster and frames (Range requests for seeking)
 """
 
+import errno
 import json
 import mimetypes
 import re
@@ -119,12 +120,25 @@ def make_handler(store: Store):
     return Handler
 
 
-def make_server(store: Store, host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:
-    return ThreadingHTTPServer((host, port), make_handler(store))
+DEFAULT_PORT = 8790  # 8765 is taken by the Prusa Workbench viewer
 
 
-def serve(store: Store, host: str = "127.0.0.1", port: int = 8765, open_browser: bool = True) -> None:
-    httpd = make_server(store, host, port)
+def make_server(store: Store, host: str = "127.0.0.1", port: int = DEFAULT_PORT,
+                tries: int = 1) -> ThreadingHTTPServer:
+    """Bind to port, or to the next free one of `tries` ports after it."""
+    for p in range(port, port + max(1, tries)):
+        try:
+            return ThreadingHTTPServer((host, p), make_handler(store))
+        except OSError as e:
+            if e.errno != errno.EADDRINUSE or p == port + max(1, tries) - 1 or port == 0:
+                raise
+    raise AssertionError("unreachable")
+
+
+def serve(store: Store, host: str = "127.0.0.1", port: int = DEFAULT_PORT, open_browser: bool = True) -> None:
+    httpd = make_server(store, host, port, tries=20)
+    if httpd.server_port != port:
+        print(f"port {port} is busy, using {httpd.server_port}")
     url = f"http://{host}:{httpd.server_port}/"
     print(f"Feed: {url}  (Ctrl+C to stop)")
     if open_browser:

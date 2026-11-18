@@ -211,7 +211,7 @@ def cmd_pick(store: Store, a) -> None:
 def cmd_serve(store: Store, a) -> None:
     from . import server
 
-    server.serve(store, a.host, a.port, open_browser=not a.no_open)
+    server.serve(store, a.host, a.port or server.DEFAULT_PORT, open_browser=not a.no_open)
 
 
 def cmd_install_skill(store: Store, a) -> None:
@@ -298,7 +298,7 @@ def parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("serve", help="open the feed")
     s.add_argument("--host", default="127.0.0.1")
-    s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--port", type=int, default=None, help="default 8790; the next free port if busy")
     s.add_argument("--no-open", action="store_true")
     s.set_defaults(func=cmd_serve)
 

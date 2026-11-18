@@ -42,7 +42,7 @@ Never scrape Instagram with automated logins.
 
 ## 4. The feed
 `reel-triage serve` (run it in the background; it opens
-http://127.0.0.1:8765). The user filters by verdict, category and status and
+http://127.0.0.1:8790). The user filters by verdict, category and status and
 marks reels Implement / Tried / Dismiss.
 
 ## 5. Implement what they picked

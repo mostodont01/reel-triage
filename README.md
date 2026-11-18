@@ -44,7 +44,7 @@ reel-triage add https://www.instagram.com/reel/…   # or single links
 
 reel-triage sort          # quick sort from captions
 reel-triage run -n 20     # deep review of the 20 newest "deep look" reels
-reel-triage serve         # the feed at http://127.0.0.1:8765
+reel-triage serve         # the feed at http://127.0.0.1:8790
 reel-triage status
 ```
 
