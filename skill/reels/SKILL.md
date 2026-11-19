@@ -19,7 +19,9 @@ Run `reel-triage status`. Tell the user in one or two lines.
 New reels sit at the top of the user's Saved page. Pick whichever fits:
 - The user pasted links or has a new Instagram export zip:
   `reel-triage add <links>` / `reel-triage import <zip>`.
-- Otherwise use Borrowed Hands: `open_browser("https://www.instagram.com/")`,
+- Easiest: `reel-triage pull` (a headless Claude with only Borrowed Hands reads
+  the Saved page; the username is remembered in settings.json). Or by hand with
+  Borrowed Hands: `open_browser("https://www.instagram.com/")`,
   `import_login("instagram.com")` if not logged in, `navigate` to
   `https://www.instagram.com/<username>/saved/all-posts/`, `read_page(full=True)`
   and collect the `/p/<id>/` links. Only the first screens matter (the grid

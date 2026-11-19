@@ -348,10 +348,26 @@ class Backend(QObject):
 
     @Slot()
     def runPipeline(self):
+        self._start([["sort"], ["run"]])
+
+    @Property(str, notify=dataChanged)
+    def instagramUser(self):
+        return self._store.settings().get("instagram_user", "")
+
+    @Slot(str)
+    def pullNew(self, user: str):
+        """Claude reads the newest saves (Borrowed Hands window), then sort + review."""
+        user = user.strip().lstrip("@")
+        if not user:
+            self.message.emit("Enter your Instagram username first")
+            return
+        self._start([["pull", "--user", user], ["sort"], ["run"]])
+
+    def _start(self, steps: list[list[str]]) -> None:
         if self._proc is not None:
             return
         self._log = []
-        self._queue = [["sort"], ["run"]]
+        self._queue = steps
         self._next_step()
         self.busyChanged.emit()
 

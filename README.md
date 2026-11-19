@@ -42,7 +42,11 @@ pip wheel, so no system packages or root are needed.
 desktop app: filters by verdict, your picks and category on the left, the
 reels in the middle, the selected reel on the right (video, the frames
 Claude saw, its verdict, the tool it checked, the install command with a Copy
-button). **Get new reels…** takes pasted links or an export zip; **Sort &
+button). **Get new reels…** can **ask Claude to pull your new saves**: it
+reads your Instagram Saved page in a [Borrowed Hands](https://github.com/mostodont01/borrowed-hands)
+window (a real browser you can see and help in; Claude only gets that one
+tool), then sorts and reviews what's new. It also takes pasted links or an
+export zip; **Sort &
 review** runs `sort` and `run` with a live log and stops on its own at 80 %
 of the 5-hour window; the Claude usage bars sit at the bottom left.
 Keys: ↑ ↓ move, I implement, T tried, D dismiss, Ctrl+F search.
@@ -54,6 +58,7 @@ Keys: ↑ ↓ move, I implement, T tried, D dismiss, Ctrl+F search.
 # Export your information → Saved, JSON, all time. Then:
 reel-triage import ~/Downloads/instagram-yourname-….zip
 reel-triage add https://www.instagram.com/reel/…   # or single links
+reel-triage pull --user yourname                   # or let Claude read your new saves (Borrowed Hands)
 
 reel-triage sort          # quick sort from captions
 reel-triage run -n 20     # deep review of the 20 newest "deep look" reels

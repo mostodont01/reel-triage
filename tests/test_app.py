@@ -114,3 +114,12 @@ def test_desktop_entry(tmp_path, monkeypatch):
     assert desktop.icon_file().is_file()
     desktop.uninstall()
     assert not path.exists() and not desktop.icon_file().exists()
+
+
+def test_pull_needs_a_username(backend, qtbot):
+    with qtbot.waitSignal(backend.message) as sig:
+        backend.pullNew("  ")
+    assert "username" in sig.args[0] and not backend.busy
+    backend._store.set_setting("instagram_user", "someone")
+    backend.reload()
+    assert backend.instagramUser == "someone"

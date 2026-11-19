@@ -514,7 +514,7 @@ ApplicationWindow {
 		anchors.centerIn: parent
 		width: 560
 		padding: 18
-		onOpened: { result.text = ""; links.forceActiveFocus() }
+		onOpened: result.text = ""
 		background: Rectangle { radius: 8; color: theme.panel; border.color: theme.border }
 
 		ColumnLayout {
@@ -522,8 +522,52 @@ ApplicationWindow {
 			spacing: 10
 
 			Text { text: "Get new reels"; color: theme.text; font.pixelSize: 16; font.bold: true }
+
+			// Ask Claude: it reads the Saved page in a Borrowed Hands window
+			Rectangle {
+				Layout.fillWidth: true
+				implicitHeight: askCol.implicitHeight + 24
+				radius: 6
+				color: "#1b2333"
+				border.color: "#2f4166"
+				ColumnLayout {
+					id: askCol
+					x: 12; y: 12
+					width: parent.width - 24
+					spacing: 8
+					Text { text: "Ask Claude"; color: theme.text; font.pixelSize: 13; font.bold: true }
+					Body {
+						color: theme.muted
+						font.pixelSize: 12
+						text: "Claude opens your Saved page in a Borrowed Hands window, collects the new saves "
+							+ "(it may ask you to scroll), then sorts and reviews them. The log shows the progress."
+					}
+					RowLayout {
+						Layout.fillWidth: true
+						spacing: 8
+						Text { text: "@"; color: theme.muted; font.pixelSize: 13 }
+						VTextField {
+							id: igUser
+							objectName: "igUserField"
+							Layout.preferredWidth: 200
+							placeholderText: "instagram username"
+							text: app.instagramUser
+						}
+						VButton {
+							objectName: "pullButton"
+							text: "Pull my new saves"
+							kind: "primary"
+							enabled: !app.busy && igUser.text.trim() !== ""
+							onClicked: { app.pullNew(igUser.text); getNew.close() }
+						}
+					}
+				}
+			}
+
+			Text { Layout.topMargin: 4; text: "Or add them yourself"; color: theme.text; font.pixelSize: 13; font.bold: true }
 			Body {
 				color: theme.muted
+				font.pixelSize: 12
 				text: "Paste Instagram links (Share → Copy link), or import a data export zip "
 					+ "(Instagram → Your activity → Download your information → Saved, JSON). "
 					+ "Reels you already have are skipped. Then press Sort & review."
@@ -562,11 +606,6 @@ ApplicationWindow {
 				VButton { text: "Close"; subtle: true; onClicked: getNew.close() }
 			}
 			Body { id: result; color: theme.ok; visible: text !== "" }
-			Body {
-				color: theme.faint
-				font.pixelSize: 11
-				text: "Or say /reels in Claude Code: it reads your newest saves on Instagram for you."
-			}
 		}
 	}
 

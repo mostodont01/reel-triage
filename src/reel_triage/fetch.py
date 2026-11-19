@@ -59,6 +59,22 @@ def download(code: str, folder: Path, cookies_from: str | None = None) -> dict:
     return info or {}
 
 
+def peek(code: str, cookies_from: str | None = None) -> dict:
+    """The post's info (caption, author, ...) without downloading anything."""
+    from yt_dlp import YoutubeDL
+    from yt_dlp.utils import DownloadError
+
+    opts = {"quiet": True, "no_warnings": True, "skip_download": True,
+            "ignore_no_formats_error": True, "retries": 2}
+    if cookies_from:
+        opts["cookiesfrombrowser"] = (cookies_from,)
+    try:
+        with YoutubeDL(opts) as ydl:
+            return ydl.extract_info(ids.url(code), download=False) or {}
+    except DownloadError as e:
+        raise FetchError(str(e).removeprefix("ERROR: ")) from None
+
+
 def _first(info: dict, key: str):
     """A field from the post, or from its first carousel item."""
     if info.get(key):

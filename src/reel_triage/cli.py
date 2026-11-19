@@ -2,6 +2,7 @@
 
     reel-triage add <link|id>...        queue reels
     reel-triage import <file>           queue everything from an Instagram export / text file
+    reel-triage pull [--user NAME]      Claude reads your newest saves on Instagram (Borrowed Hands)
     reel-triage sort [-n N]             quick sort from captions (~50 per Claude call)
     reel-triage fetch [-n N] [ids]      download + frames + transcript (default: reels sorted "deep")
     reel-triage review [-n N] [ids]     Claude's deep verdicts (claude -p, checks the web)
@@ -46,6 +47,35 @@ def cmd_import(store: Store, a) -> None:
     found = importer.read(Path(a.file))
     new = sum(store.add(code, f"import:{Path(a.file).name}", **info) for code, info in found.items())
     print(f"found {len(found)} posts: {new} new, {len(found) - new} already known")
+
+
+def cmd_pull(store: Store, a) -> None:
+    from . import claude, pull
+
+    user = (a.user or store.settings().get("instagram_user") or "").strip().lstrip("@")
+    if not user:
+        sys.exit("which Instagram account? run once with --user NAME (it is remembered)")
+    if a.user:
+        store.set_setting("instagram_user", user)
+    print(f"asking Claude to read the Saved page of @{user} (a Borrowed Hands window opens)")
+    try:
+        data, usage = pull.ask_claude(store, user, model=a.model or None)
+    except claude.ClaudeError as e:
+        sys.exit(f"pull failed: {e}")
+    new = pull.add_found(store, data.get("codes") or [])
+    print(f"Claude: {data.get('note', '')}")
+    print(f"found {len(data.get('codes') or [])} posts, {len(new)} new"
+          + ("" if data.get("reached_known") else " (didn't reach the known ones: maybe more are left)")
+          + f"  {_usage_text(usage)}")
+    if new:
+        print("getting captions…")
+        pull.fill_captions(store, new, cookies_from=a.cookies)
+
+
+def _usage_text(usage: dict) -> str:
+    if not usage:
+        return ""
+    return f"[five_hour {usage.get('five_hour', 0):.0%}, seven_day {usage.get('seven_day', 0):.0%}]"
 
 
 def _select(store: Store, a, pending: list[dict]) -> list[str]:
@@ -274,6 +304,12 @@ def parser() -> argparse.ArgumentParser:
         s.add_argument("--model", default="sonnet", help="Claude model ('' = your default)")
         s.add_argument("--max-5h", type=float, default=0.8, help="stop when the 5-hour window is this full")
         s.add_argument("--max-week", type=float, default=0.9, help="stop when the weekly window is this full")
+
+    s = sub.add_parser("pull", help="Claude reads your newest saves on Instagram (Borrowed Hands window)")
+    s.add_argument("--user", help="your Instagram username (remembered)")
+    s.add_argument("--model", default="sonnet", help="Claude model ('' = your default)")
+    s.add_argument("--cookies", metavar="BROWSER", help="browser login for the captions, e.g. firefox")
+    s.set_defaults(func=cmd_pull)
 
     s = sub.add_parser("sort", help="quick sort from captions")
     s.add_argument("-n", "--limit", type=int, default=0, help="at most N reels")

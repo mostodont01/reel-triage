@@ -126,6 +126,22 @@ class Store:
 
     # --- your setup (fed to the reviewer) -------------------------------
     @property
+    def settings_file(self) -> Path:
+        return self.root / "settings.json"
+
+    def settings(self) -> dict:
+        try:
+            return json.loads(self.settings_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+
+    def set_setting(self, key: str, value) -> None:
+        data = self.settings()
+        data[key] = value
+        self.root.mkdir(parents=True, exist_ok=True)
+        _write_json(self.settings_file, data)
+
+    @property
     def context_file(self) -> Path:
         return self.root / "context.md"
 
